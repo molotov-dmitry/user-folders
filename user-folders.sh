@@ -44,10 +44,13 @@ do
 
     if [[ -z "$src_dir" ]]
     then
-        src_dir=$(eval echo $(grep "XDG_${source_xdg[$index]}_DIR" "$HOME/.config/user-dirs.dirs" | cut -d '"' -f 2))
+        src_dir="$(xdg-user-dir ${source_xdg[$index]} 2>/dev/null)"
     fi
 
-	test -n "${src_dir}" || continue
+	if [[ -z "${src_dir}" || "${src_dir}" == "${HOME}" ]]
+	then
+	    continue
+	fi
 
 	test -L "${src_dir}" && [[ "$(readlink -f "${src_dir}")" == "$(readlink -f "${dst_dir}")" ]] && continue
 
