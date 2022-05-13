@@ -64,16 +64,19 @@ done
 
 #### Link templates to global ==================================================
 
-if [[ "$(basename "$(xdg-user-dir TEMPLATES)")" == 'Шаблоны' ]]
+if [[ "$(xdg-user-dir TEMPLATES 2>/dev/null)" != "${HOME}" ]]
 then
-    dir_path="$(xdg-user-dir TEMPLATES)/Система"
-else
-    dir_path="$(xdg-user-dir TEMPLATES)/System"
-fi
+    if [[ "$(basename "$(xdg-user-dir TEMPLATES 2>/dev/null)")" == 'Шаблоны' ]]
+    then
+        dir_path="$(xdg-user-dir TEMPLATES 2>/dev/null)/Система"
+    else
+        dir_path="$(xdg-user-dir TEMPLATES 2>/dev/null)/System"
+    fi
 
-if [[ -d '/usr/share/templates' && "$(realpath "${dir_path}")" != '/usr/share/templates' ]]
-then
-    rm -rf "${dir_path}"
-    ln -sfT /usr/share/templates "${dir_path}"
+    if [[ -d '/usr/share/templates' && "$(realpath "${dir_path}")" != '/usr/share/templates' ]]
+    then
+        rm -rf "${dir_path}"
+        ln -sfT /usr/share/templates "${dir_path}"
+    fi
 fi
 
