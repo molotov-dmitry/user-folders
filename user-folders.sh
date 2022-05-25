@@ -21,6 +21,10 @@ let DIR_COUNT=${#target_dir[@]}
 
 [[ -d "${target_disk}" ]] || exit 1
 
+#### Updated XDG directories database ==========================================
+
+xdg-user-dirs-update
+
 #### Create directories ========================================================
 
 for (( index = 0; index < DIR_COUNT; index++ ))
