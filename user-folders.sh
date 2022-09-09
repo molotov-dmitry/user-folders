@@ -51,7 +51,7 @@ do
         src_dir="$(xdg-user-dir ${source_xdg[$index]} 2>/dev/null)"
     fi
 
-	if [[ -z "${src_dir}" || "${src_dir}" == "${HOME}" ]]
+	if [[ -z "${src_dir}" || "$(realpath "${src_dir}")" == "${HOME}" ]]
 	then
 	    continue
 	fi
@@ -68,7 +68,7 @@ done
 
 #### Link templates to global ==================================================
 
-if [[ "$(xdg-user-dir TEMPLATES 2>/dev/null)" != "${HOME}" ]]
+if [[ "$(realpath "$(xdg-user-dir TEMPLATES 2>/dev/null)")" != "${HOME}" ]]
 then
     if [[ "$(basename "$(xdg-user-dir TEMPLATES 2>/dev/null)")" == 'Шаблоны' ]]
     then
