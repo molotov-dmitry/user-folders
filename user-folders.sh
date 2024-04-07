@@ -51,7 +51,7 @@ do
         src_dir="$(xdg-user-dir ${source_xdg[$index]} 2>/dev/null)"
     fi
 
-	if [[ -z "${src_dir}" || "$(realpath "${src_dir}")" == "${HOME}" ]]
+	if [[ -z "${src_dir}" || "$(realpath -q "${src_dir}")" == "${HOME}" ]]
 	then
 	    continue
 	fi
@@ -62,13 +62,14 @@ do
 	test -L "${src_dir}" && unlink "${src_dir}"
 	test -e "${src_dir}" && rm -rf "${src_dir}"
 
+    mkdir -p "$(dirname "${src_dir}")"
 	ln -s "${dst_dir}" "${src_dir}"
 
 done
 
 #### Link templates to global ==================================================
 
-if [[ "$(realpath "$(xdg-user-dir TEMPLATES 2>/dev/null)")" != "${HOME}" ]]
+if [[ "$(realpath -q "$(xdg-user-dir TEMPLATES 2>/dev/null)")" != "${HOME}" ]]
 then
     if [[ "$(basename "$(xdg-user-dir TEMPLATES 2>/dev/null)")" == 'Шаблоны' ]]
     then
@@ -77,7 +78,7 @@ then
         dir_path="$(xdg-user-dir TEMPLATES 2>/dev/null)/System"
     fi
 
-    if [[ -d '/usr/share/templates' && "$(realpath "${dir_path}")" != '/usr/share/templates' ]]
+    if [[ -d '/usr/share/templates' && "$(realpath -q "${dir_path}")" != '/usr/share/templates' ]]
     then
         rm -rf "${dir_path}"
         ln -sfT /usr/share/templates "${dir_path}"
