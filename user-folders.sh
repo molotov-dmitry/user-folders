@@ -15,6 +15,13 @@ then
     source_xdg+=( "" )
 fi
 
+if dpkg -s gnome-boxes >/dev/null 2>&1
+then
+    target_dir+=( "Boxes/images"                            "Boxes/config" )
+    source_dir+=( "${HOME}/.local/share/gnome-boxes/images" "${HOME}/.config/libvirt/qemu" )
+    source_xdg+=( ""                                        "" )
+fi
+
 let DIR_COUNT=${#target_dir[@]}
 
 ### Check destination directory exist ==========================================
