@@ -10,16 +10,23 @@ declare -a source_xdg=( "DOWNLOAD"  "DOCUMENTS" "MUSIC" "PICTURES" "VIDEOS" "TEM
 
 if dpkg -s virtualbox >/dev/null 2>&1
 then
-    target_dir+=( "VM" )
+    target_dir+=( "VirtualBox" )
     source_dir+=( "${HOME}/VirtualBox VMs" )
     source_xdg+=( "" )
 fi
 
+if dpkg -s gir1.2-libvirt-glib-1.0 >/dev/null 2>&1
+then
+    target_dir+=( "KVM/libvirt/config"              "KVM/libvirt/images"                    )
+    source_dir+=( "${HOME}/.config/libvirt/qemu"    "${HOME}/.local/share/libvirt/images"   )
+    source_xdg+=( ""                                ""                                      )
+fi
+
 if dpkg -s gnome-boxes >/dev/null 2>&1
 then
-    target_dir+=( "Boxes/images"                            "Boxes/config" )
-    source_dir+=( "${HOME}/.local/share/gnome-boxes/images" "${HOME}/.config/libvirt/qemu" )
-    source_xdg+=( ""                                        "" )
+    target_dir+=( "KVM/gnome-boxes/images"                  )
+    source_dir+=( "${HOME}/.local/share/gnome-boxes/images" )
+    source_xdg+=( ""                                        )
 fi
 
 let DIR_COUNT=${#target_dir[@]}
@@ -31,6 +38,27 @@ let DIR_COUNT=${#target_dir[@]}
 #### Update XDG directories database ===========================================
 
 xdg-user-dirs-update --force
+
+#### Update old directory names ================================================
+
+if [[ -d "${target_disk}/Boxes/images" && ! -e "${target_disk}/KVM/gnome-boxes/images"  ]]
+then
+    mkdir -p "${target_disk}/KVM/gnome-boxes"
+    mv "${target_disk}/Boxes/images" "${target_disk}/KVM/gnome-boxes/images"
+    rmdir "${target_disk}/Boxes" 2>/dev/null
+fi
+
+if [[ -d "${target_disk}/Boxes/config" && ! -e "${target_disk}/KVM/libvirt/config"  ]]
+then
+    mkdir -p "${target_disk}/KVM/libvirt"
+    mv "${target_disk}/Boxes/config" "${target_disk}/KVM/libvirt/config"
+    rmdir "${target_disk}/Boxes" 2>/dev/null
+fi
+
+if [[ -d "${target_disk}/VM" && ! -e "${target_disk}/VirtualBox"  ]]
+then
+    mv "${target_disk}/VM" "${target_disk}/VirtualBox"
+fi
 
 #### Create directories ========================================================
 
