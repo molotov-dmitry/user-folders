@@ -17,7 +17,7 @@ then
     source_ico+=( 'folder-vbox' )
 fi
 
-if dpkg -s gir1.2-libvirt-glib-1.0 >/dev/null 2>&1
+if dpkg -s libvirt0 >/dev/null 2>&1 || dpkg -s gir1.2-libvirt-glib-1.0 || dpkg -s gnome-boxes >/dev/null 2>&1
 then
     target_dir+=( "KVM/libvirt/config"              "KVM/libvirt/images"                    )
     source_dir+=( "${HOME}/.config/libvirt/qemu"    "${HOME}/.local/share/libvirt/images"   )
