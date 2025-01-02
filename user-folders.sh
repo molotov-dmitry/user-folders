@@ -7,12 +7,14 @@ readonly target_disk="/media/documents/$USER"
 declare -a target_dir=( "Downloads" "Documents" "Music" "Images"   "Video"  "Templates" "Projects"         )
 declare -a source_dir=( ""          ""          ""      ""         ""       ""          "${HOME}/Projects" )
 declare -a source_xdg=( "DOWNLOAD"  "DOCUMENTS" "MUSIC" "PICTURES" "VIDEOS" "TEMPLATES" ""                 )
+declare -a source_ico=( ''          ''          ''      ''         ''       ''          'folder-projects'  )
 
 if dpkg -s virtualbox >/dev/null 2>&1
 then
     target_dir+=( "VirtualBox" )
     source_dir+=( "${HOME}/VirtualBox VMs" )
     source_xdg+=( "" )
+    source_ico+=( 'folder-vbox' )
 fi
 
 if dpkg -s gir1.2-libvirt-glib-1.0 >/dev/null 2>&1
@@ -20,13 +22,15 @@ then
     target_dir+=( "KVM/libvirt/config"              "KVM/libvirt/images"                    )
     source_dir+=( "${HOME}/.config/libvirt/qemu"    "${HOME}/.local/share/libvirt/images"   )
     source_xdg+=( ""                                ""                                      )
+    source_ico+=( 'folder-vmware'                   'folder-vmware'                         )
 fi
 
 if dpkg -s gnome-boxes >/dev/null 2>&1
 then
     target_dir+=( "KVM/gnome-boxes/images"                  )
     source_dir+=( "${HOME}/.local/share/gnome-boxes/images" )
-    source_xdg+=( ""                                        )
+    source_xdg+=( ''                                        )
+    source_ico+=( 'folder-vmware'                           )
 fi
 
 let DIR_COUNT=${#target_dir[@]}
@@ -80,6 +84,7 @@ for (( index = 0; index < DIR_COUNT; index++ ))
 do
 	dst_dir="${target_disk}/${target_dir[$index]}"
     src_dir="${source_dir[$index]}"
+    icon="${source_ico[$index]}"
 
     if [[ -z "$src_dir" ]]
     then
@@ -88,17 +93,27 @@ do
 
 	if [[ -z "${src_dir}" || "$(realpath -q "${src_dir}")" == "${HOME}" ]]
 	then
-	    continue
+	    :
+	else
+	    if test -L "${src_dir}" && [[ "$(readlink -f "${src_dir}")" == "$(readlink -f "${dst_dir}")" ]]
+	    then
+	        :
+	    else
+	        test -d "${src_dir}" && find "${src_dir}/" -mindepth 1 -maxdepth 1 -exec mv -b -f -t "${dst_dir}/" {} +
+	        test -L "${src_dir}" && unlink "${src_dir}"
+	        test -e "${src_dir}" && rm -rf "${src_dir}"
+
+            mkdir -p "$(dirname "${src_dir}")"
+	        ln -s "${dst_dir}" "${src_dir}"
+	    fi
 	fi
+	
+	#### Set custom icons ------------------------------------------------------
 
-	test -L "${src_dir}" && [[ "$(readlink -f "${src_dir}")" == "$(readlink -f "${dst_dir}")" ]] && continue
-
-	test -d "${src_dir}" && find "${src_dir}/" -mindepth 1 -maxdepth 1 -exec mv -b -f -t "${dst_dir}/" {} +
-	test -L "${src_dir}" && unlink "${src_dir}"
-	test -e "${src_dir}" && rm -rf "${src_dir}"
-
-    mkdir -p "$(dirname "${src_dir}")"
-	ln -s "${dst_dir}" "${src_dir}"
+	if which gio >/dev/null 2>/dev/null && [[ -n "${icon}" ]]
+	then
+	    gio set "${src_dir}" metadata::custom-icon-name "${icon}"
+    fi
 
 done
 
